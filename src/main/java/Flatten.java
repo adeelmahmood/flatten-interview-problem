@@ -1,6 +1,8 @@
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -23,7 +25,27 @@ public class Flatten {
         ObjectMapper m = new ObjectMapper();
         List<Map<String, Object>> data = m.readValue(json, List.class);
 
-        System.out.println(data);
+        for (Map<String, Object> d : data) {
+            Map<String, String> flattenedData = flatten(d);
+            System.out.println(flattenedData);
+        }
+    }
+
+    public static Map<String, String> flatten(Map<String, Object> data) {
+        Map<String, String> result = new HashMap<>();
+        for (Map.Entry<String, Object> o : data.entrySet()) {
+
+            if (o.getValue() instanceof Map) {
+                Map<String, String> flatten = flatten((Map<String, Object>) o.getValue());
+
+                for(Map.Entry<String, String> entry : flatten.entrySet()) {
+                    result.put(o.getKey() + "_" + entry.getKey(), entry.getValue());
+                }
+            } else {
+                result.put(o.getKey(), String.valueOf(o.getValue()));
+            }
+        }
+        return result;
     }
 }
 
